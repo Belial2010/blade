@@ -35,7 +35,7 @@ extern "C" {
  * Signature: ([BIILski/blade/Barcode;)I
  */
 JNIEXPORT jint JNICALL Java_ski_blade_FrameProcessor_00024NativeProcessor_blade
-  (JNIEnv *, jobject, jbyteArray, jint, jint, jobject);
+  (JNIEnv *, jobject, jbyteArray, jint, jint, jobject, jboolean);
 
 #ifdef __cplusplus
 }

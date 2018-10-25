@@ -79,13 +79,14 @@ public class FrameProcessor {
 	 * @param h height of the frames that will be received
 	 * @param aCam camera
 	 */
-	FrameProcessor(int w, int h, OnBarcodeFound callback, Activity act) {
+	FrameProcessor(int w, int h, OnBarcodeFound callback, Activity act, boolean locationOnly) 
+	{
 		//Get the preview surfaces and open camera
 		camera_ = new CameraHandler(w, h, (SurfaceView) act.findViewById(R.id.preview), cameraCallbacks_);
 		callback_ = callback;
 
 		//Set up image processing thread
-		backgroundProc = new Thread(new NativeProcessor());
+		backgroundProc = new Thread(new NativeProcessor(locationOnly));
 		backgroundProc.setPriority(Thread.MAX_PRIORITY);
 		//Audio feedback
 		feedback = new SoundFeedback();
@@ -102,7 +103,12 @@ public class FrameProcessor {
 
 		//Options
 		setOptions(new ProcessorOptions());
-}
+	}
+
+	FrameProcessor(int w, int h, OnBarcodeFound callback, Activity act, boolean locationOnly)
+	{
+		this(w, h, callback, act, false);
+	}
 
 	/**
 	 * @class Processor options
@@ -436,12 +442,18 @@ public class FrameProcessor {
 	private class NativeProcessor implements Runnable {
 		/** Message handler*/
 		private MsgHandler msgHandler = new MsgHandler();
+		private boolean locationOnly = false;
 		
 		/**
 		 * Constructor
 		 */
 		public NativeProcessor() {
 			bc = new Barcode();
+		}
+
+		public NativeProcessor( boolean locationOnly ) {
+			this();
+			this.locationOnly = locationOnly;
 		}
 		
 		/** Barcode detection function 
@@ -450,7 +462,7 @@ public class FrameProcessor {
 		 * @param[in] height height of the image
 		 * @param[out] aBC barcode structure if found.
 		 */
-		private native int blade(byte[] yuv420, int height, int width, Barcode aBc);
+		private native int blade(byte[] yuv420, int height, int width, Barcode aBc, boolean locationOnly);
 
 		@Override
 		public void run() {
@@ -464,7 +476,7 @@ public class FrameProcessor {
 					lock.lock();
 					//Do the processing if not finished or interrupted
 					Log.d(TAG, "Received frame for processing with height = " + height_ + ", width = " + width_);
-					int result = blade(buffer_, height_, width_, bc);
+					int result = blade(buffer_, height_, width_, bc, locationOnly);
 					//Signal end of processing for this frame
 					msgHandler.sendEmptyMessage((result < 0 ? Status.ERROR : result));
 					//Finished processing, wait for new frame

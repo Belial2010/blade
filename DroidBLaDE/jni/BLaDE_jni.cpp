@@ -43,7 +43,7 @@ enum ReturnCodes
 };
 
 jint Java_ski_blade_FrameProcessor_00024NativeProcessor_blade(JNIEnv* env, jobject obj,
-		jbyteArray yuv420, jint height, jint width, jobject barcode)
+		jbyteArray yuv420, jint height, jint width, jobject barcode, jboolean locationOnly)
 {
 	int scale = 0;
 	//========================
@@ -100,14 +100,17 @@ jint Java_ski_blade_FrameProcessor_00024NativeProcessor_blade(JNIEnv* env, jobje
 			LOGD("Found barcode between (%d,%d)-(%d,%d)", pt1.x, pt1.y, pt2.x, pt2.y);
 			res = RES_BCDETECTED;
 			///Attempt to decode barcode
-			bool isDecoded = blade.decode(bc);
-			if (isDecoded)
+			if (!locationOnly)
 			{
-				//Return the barcode information
-				fID = env->GetFieldID(cls, "UPC", "Ljava/lang/String;");
-				jstring upc = env->NewStringUTF(bc.estimate.c_str());
-				env->SetObjectField(barcode, fID, upc);
-				res = RES_BCDECODED;
+				bool isDecoded = blade.decode(bc);
+				if (isDecoded)
+				{
+					//Return the barcode information
+					fID = env->GetFieldID(cls, "UPC", "Ljava/lang/String;");
+					jstring upc = env->NewStringUTF(bc.estimate.c_str());
+					env->SetObjectField(barcode, fID, upc);
+					res = RES_BCDECODED;
+				}
 			}
 		}
 
