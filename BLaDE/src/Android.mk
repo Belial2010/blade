@@ -10,4 +10,4 @@ LOCAL_LDLIBS := -llog
 LOCAL_ARM_MODE := arm
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/../../include/ski/BLaDE/
 
-include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_STATIC_LIBRARY)
