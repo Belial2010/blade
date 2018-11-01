@@ -101,7 +101,7 @@ public:
 		/** Copy constructor */
 		SubState(const SubState &aSubState);
 		/** For sorting states */
-		inline bool operator< (const SubState& anotherState) {return energy < anotherState.energy; };
+		inline bool operator< (const SubState& anotherState) const {return energy < anotherState.energy; };        
 	};
 
 	struct State
